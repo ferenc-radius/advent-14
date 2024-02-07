@@ -4,57 +4,111 @@ public class ReflectorDish(byte[,] dish)
 {
     public void TillLever()
     {
-        for (var colIndex = 0; colIndex < dish.GetLength(1); colIndex++)
-        {
-            bool moveUp;
-            do
-            {
-                // keep moving the round rocks up till no move is left.
-                moveUp = MoveUp(colIndex);
-            } 
-            while (moveUp);
-        }
-        
+        SlideRocksNorth();
     }
 
-    /**
-     * Returns true if any round rocks are moved.
-     */
-    private bool MoveUp(int col)
+    public void SpinCycle()
     {
-        var moves = 0;
-        var colValues = Enumerable.Range(0, dish.GetLength(0)).Select(x => dish[x, col]).ToArray();
-
-        for (var i = 1; i < colValues.Length; i++)
+        for (var i = 0; i < 4; i++)
         {
-            // move round rock north if spot is available.
-            if (colValues[i] == Mirror.RoundRock && colValues[i-1] == Mirror.Empty)
-            {
-                dish[i - 1, col] = Mirror.RoundRock;
-                dish[i, col] = Mirror.Empty;
-                moves++;
-            }
+            SlideRocksNorth();
+            RotateDish();
         }
-
-        return moves > 0;
     }
 
     public int GetNorthLoad()
     {
         var totalLoad = 0;
-        var load = dish.GetLength(0);
+        var rows = dish.GetLength(0);
         for (var i = 0; i < dish.GetLength(0); i++)
         {
+            var load = (rows - i);
             for (var j = 0; j < dish.GetLength(1); j++)
             {
                 if (dish[i, j] == Mirror.RoundRock)
                 {
-                    totalLoad += (load - i);
+                    totalLoad += load;
                 }
             }
         }
 
         return totalLoad;
+    }
+
+    public int MultipleSpinCycles(int cycles)
+    {
+        // There is a repeated pattern here, we assume that can be found in 300 iterations. 
+        var results = new List<int>();
+        for (var i = 0; i < 300; i++)
+        {
+            SpinCycle();
+            var load = GetNorthLoad();
+            results.Add(load);
+        }
+
+        // Assumes the last number only occurs once in the cycle
+        int cycleLength = 0;
+        for (var i = results.Count - 2; i >= 0; i--)
+        {
+            if (results[i] == results[^1])
+            {
+                cycleLength = results.Count - 1 - i;
+                break;
+            }
+        }
+
+        // get the value by getting the remainder which then should be the iteration asked for.
+        var rem = cycles % cycleLength;
+        var loadAfterCycles = 0;
+        for (var i = results.Count - 2; i >= 0; i--)
+        {
+            if (i % cycleLength == rem)
+            {
+                loadAfterCycles = results[i-1];
+                break;
+            }
+        }
+        
+        return loadAfterCycles;
+    }
+
+    private void RotateDish()
+    {
+        // rotate in place clock wise
+        var n = dish.GetLength(0);
+        for (var i = 0; i < n / 2; i++)
+        {
+            for (var j = i; j < n - i - 1; j++)
+            {
+                var temp = dish[i, j];
+                dish[i, j] = dish[n - j - 1, i];
+                dish[n - j - 1, i] = dish[n - i - 1, n - j - 1];
+                dish[n - i - 1, n - j - 1] = dish[j, n - i - 1];
+                dish[j, n - i - 1] = temp;
+            }
+        }
+    }
+
+    private void SlideRocksNorth()
+    {
+        bool hasMoved;
+        do
+        {
+            hasMoved = false;
+            for (var rowIndex = 1; rowIndex < dish.GetLength(0); rowIndex++)
+            {
+                for (var colIndex = 0; colIndex < dish.GetLength(1); colIndex++)
+                {
+                    // move round rock north if spot is available
+                    if (dish[rowIndex, colIndex] == Mirror.RoundRock && dish[rowIndex - 1, colIndex] == Mirror.Empty)
+                    {
+                        dish[rowIndex - 1, colIndex] = Mirror.RoundRock;
+                        dish[rowIndex, colIndex] = Mirror.Empty;
+                        hasMoved = true;
+                    }
+                }
+            }
+        } while (hasMoved);
     }
 
     public void Print()
