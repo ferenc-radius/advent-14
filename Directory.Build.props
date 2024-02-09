@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<Project>
+    <PropertyGroup>
+        <!-- C# 12 & .NET 8.0 -->
+        <LangVersion>12</LangVersion>
+        <TargetFramework>net8.0</TargetFramework>
+
+        <!-- Require explicit nullability mark and treat null-issues as errors instead of warnings.
+             Without this, all of the following would compile:
+
+                 String x = null;
+
+                 class Menu { public String caption; }
+                 Menu instance = null;
+                 Menu another = new Menu { caption = null };
+                 
+             You must explicitly mark things as nullable now:
+
+                 String? x = null;
+                 class Menu { public String? caption; }
+        -->
+        <Nullable>enable</Nullable>
+        <WarningsAsErrors>Nullable</WarningsAsErrors>
+    </PropertyGroup>
+</Project>

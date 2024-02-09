@@ -1,4 +1,6 @@
 ﻿using advent_14;
+var watch = new System.Diagnostics.Stopwatch();
+watch.Start();
 
 // parse reflector dish configuration
 // var dish = DishParser.Parse("configurations/example.dish");
@@ -17,3 +19,5 @@ Console.WriteLine($"Total load on north support beam: {totalLoad}");
 // PART 2
 var loadAfterCycles = reflectorDish.MultipleSpinCycles(1000000000);
 Console.WriteLine($"Total load on north support beam: {loadAfterCycles}");
+watch.Stop();
+Console.WriteLine($"Execution Time: {watch.ElapsedMilliseconds} ms");
